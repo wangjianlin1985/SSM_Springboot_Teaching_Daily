@@ -1,0 +1,50 @@
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--namespace命名空间，为了对sql语句进行隔离，方便管理，mapper开发dao方式，使用namespace有特殊作用  
+mapper代理开发时将namespace指定为mapper接口的全限定名  
+ -->
+<mapper namespace="com.chengxusheji.mapper.TeachMapper"> 
+<!--在mapper.xml文件中配置很多的sql语句，执行每个sql语句时，封装为MappedStatement对象 
+mapper.xml以statement为单位管理sql语句  
+ -->
+	<!-- 添加教学日历记录 -->
+	<insert id="addTeach" parameterType="teach">
+		insert into t_teach(courseObj,teacherObj,weekDay,sectionNum,classRoom,teachMemo) values 
+		(#{courseObj.courseNo},#{teacherObj.teacherNo},#{weekDay},#{sectionNum},#{classRoom},#{teachMemo})
+	</insert>
+
+	<!-- 按照查询条件分页查询教学日历记录 -->
+	<select id="queryTeach" resultMap="teachMap" >
+		select t_teach.* from t_teach,t_course,t_teacher ${where} and t_teach.courseObj = t_course.courseNo and t_teach.teacherObj = t_teacher.teacherNo limit #{startIndex},#{pageSize}
+	</select>
+	<resultMap id="teachMap" type="teach">
+        <id property="teachId" column="teachId" />
+        <association property="courseObj" column="courseObj" select="com.chengxusheji.mapper.CourseMapper.getCourse" />
+        <association property="teacherObj" column="teacherObj" select="com.chengxusheji.mapper.TeacherMapper.getTeacher" />
+    </resultMap>
+
+    <!-- 按照查询条件查询所有教学日历记录 -->
+	<select id="queryTeachList" resultMap="teachMap" >
+		select t_teach.* from t_teach,t_course,t_teacher ${where} and t_teach.courseObj = t_course.courseNo and t_teach.teacherObj = t_teacher.teacherNo
+	</select>
+
+    <!-- 按照查询条件的教学日历记录数 -->
+	<select id="queryTeachCount" resultType="int">
+		select count(*) from t_teach,t_course,t_teacher ${where} and t_teach.courseObj = t_course.courseNo and t_teach.teacherObj = t_teacher.teacherNo
+	</select>
+
+	<!-- 根据主键查询某个教学日历记录 -->
+	<select id="getTeach" parameterType="int" resultMap="teachMap">
+		select * from t_teach where t_teach.teachId = #{teachId}
+	</select>
+
+	<!-- 更新教学日历记录 -->
+	<update id="updateTeach" parameterType="teach">
+		update t_teach set courseObj=#{courseObj.courseNo},teacherObj=#{teacherObj.teacherNo},weekDay=#{weekDay},sectionNum=#{sectionNum},classRoom=#{classRoom},teachMemo=#{teachMemo} where teachId = #{teachId}
+	</update>
+
+	<!-- 删除教学日历记录 -->
+	<delete id="deleteTeach" parameterType="int">
+		delete from t_teach where teachId=#{teachId}
+	</delete>
+
+</mapper>
